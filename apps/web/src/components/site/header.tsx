@@ -9,11 +9,8 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-[rgba(11,31,51,0.06)] bg-[rgba(248,251,253,0.92)] backdrop-blur-xl">
       <Container className="relative flex items-center justify-between gap-4 py-3">
-        <Link href="/" className="flex min-w-[11rem] flex-col items-start gap-1">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--teal)]">
-            Multi-bank workspace
-          </span>
-          <Image src="/northline-logo.svg" alt="Northline" width={150} height={37} priority />
+        <Link href="/" className="flex min-w-[12rem] items-center">
+          <Image src="/northline-logo.png" alt="Northline" width={190} height={45} priority />
         </Link>
 
         <nav className="nav-surface hidden flex-1 items-center justify-center gap-1 rounded-full px-2 py-2 lg:flex">
