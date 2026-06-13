@@ -1,9 +1,5 @@
 import OpenAI from "openai";
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
-
 const SYSTEM_PROMPT = `
 You are Northline AI, a read-only financial insight assistant.
 
@@ -28,6 +24,10 @@ export async function POST(req: Request) {
         { status: 500 }
       );
     }
+
+    const client = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY
+    });
 
     const body = await req.json();
     const message = body?.message;
