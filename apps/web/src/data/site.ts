@@ -3,6 +3,7 @@ import { featureFlags } from "@/lib/feature-flags";
 export const navigation = [
   { href: "/dashboard-demo", label: "Dashboard" },
   { href: "/transactions", label: "Transactions" },
+  { href: "/ai-assistant", label: "AI Assistant" },
   { href: "/plaid-integration", label: "Connect" },
   { href: "/pricing", label: "Pricing" },
   { href: "/security", label: "Trust" },
