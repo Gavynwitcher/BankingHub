@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-type ButtonProps = {
+type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   href?: string;
   children: React.ReactNode;
   className?: string;
@@ -18,10 +18,18 @@ const styles = {
     "border border-white/18 bg-white/10 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] hover:bg-white/16"
 };
 
-export function Button({ href, children, className, variant = "primary" }: ButtonProps) {
+export function Button({
+  href,
+  children,
+  className,
+  variant = "primary",
+  disabled,
+  ...props
+}: ButtonProps) {
   const shared = cn(
     "inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold transition duration-200",
     styles[variant],
+    disabled && "pointer-events-none cursor-not-allowed opacity-55",
     className
   );
 
@@ -33,5 +41,9 @@ export function Button({ href, children, className, variant = "primary" }: Butto
     );
   }
 
-  return <button className={shared}>{children}</button>;
+  return (
+    <button className={shared} disabled={disabled} {...props}>
+      {children}
+    </button>
+  );
 }

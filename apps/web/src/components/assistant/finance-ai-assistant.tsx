@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 
 const promptCards = [
   "Summarize my cash position",
@@ -22,37 +21,73 @@ const dashboardStats = [
 ];
 
 type Message = {
+  id: string;
   role: "user" | "assistant";
   content: string;
 };
 
-function buildLocalResponse(prompt: string) {
-  return `Agentic mode is ready to review "${prompt}". This read-only workspace is prepared for connected financial insights while transfers and account changes remain unavailable.`;
+function createMessage(role: Message["role"], content: string): Message {
+  return {
+    id: `${role}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    role,
+    content
+  };
+}
+
+async function buildMockAiResponse(prompt: string) {
+  await new Promise((resolve) => {
+    window.setTimeout(resolve, 700);
+  });
+
+  if (prompt.toLowerCase().includes("error")) {
+    throw new Error("Northline AI could not prepare a preview response. Please try again.");
+  }
+
+  return `Here is a read-only preview for "${prompt}": Northline AI would summarize the relevant balances, transactions, cash-flow movement, and upcoming obligations without making transfers or account changes.`;
 }
 
 export function FinanceAiAssistant() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const latestUserMessage = useMemo(
-    () => [...messages].reverse().find((message) => message.role === "user"),
+  const userMessages = useMemo(
+    () => messages.filter((message) => message.role === "user"),
     [messages]
   );
-  const latestAssistantMessage = useMemo(
-    () => [...messages].reverse().find((message) => message.role === "assistant"),
+  const assistantMessages = useMemo(
+    () => messages.filter((message) => message.role === "assistant"),
     [messages]
   );
 
-  function submitPrompt(value: string) {
+  async function submitPrompt(value: string) {
     const prompt = value.trim();
-    if (!prompt) return;
+    if (!prompt || isLoading) return;
 
-    setMessages([
-      { role: "user", content: prompt },
-      { role: "assistant", content: buildLocalResponse(prompt) }
-    ]);
+    setError("");
     setInput("");
+    setIsLoading(true);
+    setMessages((currentMessages) => [...currentMessages, createMessage("user", prompt)]);
+
+    try {
+      const response = await buildMockAiResponse(prompt);
+      setMessages((currentMessages) => [
+        ...currentMessages,
+        createMessage("assistant", response)
+      ]);
+    } catch (caughtError) {
+      setError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : "Northline AI could not prepare a preview response. Please try again."
+      );
+    } finally {
+      setIsLoading(false);
+    }
   }
+
+  const canSubmit = input.trim().length > 0 && !isLoading;
 
   return (
     <div className="grid gap-5 xl:grid-cols-[0.9fr_1.5fr]">
@@ -75,8 +110,12 @@ export function FinanceAiAssistant() {
               <button
                 key={prompt}
                 type="button"
-                onClick={() => setInput(prompt)}
-                className="rounded-[22px] border border-[var(--line)] bg-white/80 px-4 py-4 text-left text-sm font-semibold leading-6 text-[var(--navy)] transition hover:border-[var(--ocean)] hover:bg-white"
+                onClick={() => {
+                  setInput(prompt);
+                  void submitPrompt(prompt);
+                }}
+                disabled={isLoading}
+                className="rounded-[22px] border border-[var(--line)] bg-white/80 px-4 py-4 text-left text-sm font-semibold leading-6 text-[var(--navy)] transition hover:border-[var(--ocean)] hover:bg-white disabled:cursor-not-allowed disabled:opacity-55"
               >
                 {prompt}
               </button>
@@ -117,9 +156,16 @@ export function FinanceAiAssistant() {
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
               User message area
             </p>
-            {latestUserMessage ? (
-              <div className="mt-4 rounded-[20px] bg-[var(--navy)] px-4 py-4 text-sm leading-6 text-white">
-                {latestUserMessage.content}
+            {userMessages.length ? (
+              <div className="mt-4 grid max-h-[24rem] gap-3 overflow-y-auto pr-1">
+                {userMessages.map((message) => (
+                  <div
+                    key={message.id}
+                    className="rounded-[20px] bg-[var(--navy)] px-4 py-4 text-sm leading-6 text-white"
+                  >
+                    {message.content}
+                  </div>
+                ))}
               </div>
             ) : (
               <div className="mt-4 flex min-h-[12rem] items-center justify-center rounded-[20px] border border-dashed border-[var(--line-strong)] bg-[rgba(248,251,253,0.72)] px-5 text-center">
@@ -137,30 +183,48 @@ export function FinanceAiAssistant() {
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
               AI response area
             </p>
-            <div
-              className={cn(
-                "mt-4 min-h-[12rem] rounded-[20px] border px-4 py-4 text-sm leading-7",
-                latestAssistantMessage
-                  ? "border-[rgba(25,106,117,0.16)] bg-white text-[var(--navy)]"
-                  : "border-dashed border-[var(--line-strong)] bg-white/70 text-[var(--muted)]"
-              )}
-            >
-              {latestAssistantMessage ? (
-                latestAssistantMessage.content
+            <div className="mt-4 grid max-h-[24rem] min-h-[12rem] gap-3 overflow-y-auto pr-1">
+              {assistantMessages.length ? (
+                assistantMessages.map((message) => (
+                  <div
+                    key={message.id}
+                    className="rounded-[20px] border border-[rgba(25,106,117,0.16)] bg-white px-4 py-4 text-sm leading-7 text-[var(--navy)]"
+                  >
+                    {message.content}
+                  </div>
+                ))
               ) : (
-                <p>
-                  Northline AI responses will appear here as connected insights become available.
-                </p>
+                <div className="rounded-[20px] border border-dashed border-[var(--line-strong)] bg-white/70 px-4 py-4 text-sm leading-7 text-[var(--muted)]">
+                  <p>
+                    Northline AI responses will appear here as connected insights become available.
+                  </p>
+                </div>
               )}
+
+              {isLoading ? (
+                <div className="rounded-[20px] border border-[rgba(25,106,117,0.16)] bg-white px-4 py-4 text-sm leading-7 text-[var(--muted)]">
+                  <span className="inline-flex items-center gap-2">
+                    <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--ocean)]" />
+                    Preparing a read-only preview...
+                  </span>
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
+
+        {error ? (
+          <div className="mx-5 mb-5 rounded-[20px] border border-[rgba(185,111,25,0.22)] bg-[rgba(255,250,237,0.92)] px-4 py-4 text-sm leading-6 text-[var(--navy)]">
+            <p className="font-semibold text-[var(--warning)]">Something went wrong</p>
+            <p className="mt-1">{error}</p>
+          </div>
+        ) : null}
 
         <form
           className="border-t border-[var(--line)] p-5"
           onSubmit={(event) => {
             event.preventDefault();
-            submitPrompt(input);
+            void submitPrompt(input);
           }}
         >
           <label className="sr-only" htmlFor="northline-ai-input">
@@ -170,11 +234,17 @@ export function FinanceAiAssistant() {
             <textarea
               id="northline-ai-input"
               value={input}
-              onChange={(event) => setInput(event.target.value)}
+              onChange={(event) => {
+                setInput(event.target.value);
+                if (error) setError("");
+              }}
               placeholder="Ask about cash flow, balances, spending, or upcoming obligations..."
-              className="min-h-[84px] flex-1 resize-none rounded-[18px] border border-transparent bg-[rgba(248,251,253,0.88)] px-4 py-3 text-sm leading-6 text-[var(--navy)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--ocean)]"
+              className="min-h-[84px] flex-1 resize-none rounded-[18px] border border-transparent bg-[rgba(248,251,253,0.88)] px-4 py-3 text-sm leading-6 text-[var(--navy)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--ocean)] disabled:cursor-not-allowed disabled:opacity-70"
+              disabled={isLoading}
             />
-            <Button className="sm:min-w-[7.5rem]">Send</Button>
+            <Button className="sm:min-w-[7.5rem]" disabled={!canSubmit}>
+              {isLoading ? "Sending..." : "Send"}
+            </Button>
           </div>
         </form>
       </Card>
