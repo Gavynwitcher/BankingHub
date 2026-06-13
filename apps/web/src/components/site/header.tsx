@@ -9,18 +9,11 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-[rgba(11,31,51,0.06)] bg-[rgba(248,251,253,0.92)] backdrop-blur-xl">
       <Container className="relative flex items-center justify-between gap-4 py-3">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-[16px] border border-[rgba(255,255,255,0.14)] bg-[var(--navy)] shadow-[0_12px_22px_rgba(11,31,51,0.16)]">
-            <Image src="/favicon.svg" alt="Northline logo mark" width={44} height={44} priority />
-          </div>
-          <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--teal)]">
-              Multi-bank workspace
-            </p>
-            <p className="font-heading text-lg font-semibold tracking-[-0.04em] text-[var(--navy)]">
-              Northline
-            </p>
-          </div>
+        <Link href="/" className="flex min-w-[11rem] flex-col items-start gap-1">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-[var(--teal)]">
+            Multi-bank workspace
+          </span>
+          <Image src="/northline-logo.svg" alt="Northline" width={150} height={37} priority />
         </Link>
 
         <nav className="nav-surface hidden flex-1 items-center justify-center gap-1 rounded-full px-2 py-2 lg:flex">
