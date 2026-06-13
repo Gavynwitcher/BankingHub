@@ -3,6 +3,7 @@ import { featureFlags } from "@/lib/feature-flags";
 export const navigation = [
   { href: "/dashboard-demo", label: "Dashboard" },
   { href: "/transactions", label: "Transactions" },
+  { href: "/assistant", label: "AI" },
   { href: "/plaid-integration", label: "Connect" },
   { href: "/pricing", label: "Pricing" },
   { href: "/security", label: "Trust" },
@@ -274,6 +275,7 @@ export const footerColumns = [
       { href: "/features", label: "Features" },
       { href: "/dashboard-demo", label: "Dashboard" },
       { href: "/transactions", label: "Transactions" },
+      { href: "/assistant", label: "Northline AI" },
       { href: "/plaid-integration", label: "Connect" },
       { href: "/pricing", label: "Pricing" }
     ]

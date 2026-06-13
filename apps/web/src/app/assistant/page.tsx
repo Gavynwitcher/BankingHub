@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AgentModePanel } from "@/components/assistant/agent-mode-panel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -59,43 +60,7 @@ export default function AssistantPage() {
       <section className="page-section pt-0">
         <Container>
           <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
-            <Card className="rounded-[30px]">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <Badge tone="success">Northline AI</Badge>
-                  <h2 className="mt-4 font-heading text-3xl font-semibold tracking-[-0.03em] text-[var(--navy)]">
-                    Ask for financial context, not financial control.
-                  </h2>
-                </div>
-                <Badge tone="teal" className="max-w-[22rem] leading-5 tracking-[0.12em]">
-                  Read-only financial insights. No transfers or account changes.
-                </Badge>
-              </div>
-
-              <div className="mt-6 rounded-[24px] border border-[var(--line)] bg-white/80 p-4">
-                <label className="sr-only" htmlFor="northline-ai-question">
-                  Ask Northline AI
-                </label>
-                <textarea
-                  id="northline-ai-question"
-                  disabled
-                  placeholder="Ask about cash flow, balances, spending, or upcoming obligations..."
-                  className="min-h-[160px] w-full resize-none rounded-[20px] border border-[var(--line)] bg-white px-4 py-4 text-sm leading-6 text-[var(--navy)] outline-none placeholder:text-[var(--muted)] disabled:cursor-not-allowed"
-                />
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-xs leading-5 text-[var(--muted)]">
-                    Answers stay read-only and cannot initiate transfers or account changes.
-                  </p>
-                  <button
-                    type="button"
-                    disabled
-                    className="inline-flex cursor-not-allowed items-center justify-center rounded-2xl bg-[var(--navy)] px-5 py-3 text-sm font-semibold text-white opacity-55"
-                  >
-                    Ask
-                  </button>
-                </div>
-              </div>
-            </Card>
+            <AgentModePanel />
 
             <Card className="rounded-[30px]">
               <Badge tone="muted">Example questions</Badge>
