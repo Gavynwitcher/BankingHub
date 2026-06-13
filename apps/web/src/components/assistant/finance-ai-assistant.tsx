@@ -26,6 +26,11 @@ type Message = {
   content: string;
 };
 
+type FinanceChatResponse = {
+  answer?: string;
+  error?: string;
+};
+
 function createMessage(role: Message["role"], content: string): Message {
   return {
     id: `${role}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
@@ -34,16 +39,24 @@ function createMessage(role: Message["role"], content: string): Message {
   };
 }
 
-async function buildMockAiResponse(prompt: string) {
-  await new Promise((resolve) => {
-    window.setTimeout(resolve, 700);
+async function sendMessage(message: string) {
+  const response = await fetch("/api/ai/finance-chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      message
+    })
   });
 
-  if (prompt.toLowerCase().includes("error")) {
-    throw new Error("Northline AI could not prepare a preview response. Please try again.");
+  const data = (await response.json()) as FinanceChatResponse;
+
+  if (!response.ok) {
+    throw new Error(data.error || "AI request failed");
   }
 
-  return `Here is a read-only preview for "${prompt}": Northline AI would summarize the relevant balances, transactions, cash-flow movement, and upcoming obligations without making transfers or account changes.`;
+  return data;
 }
 
 export function FinanceAiAssistant() {
@@ -71,10 +84,13 @@ export function FinanceAiAssistant() {
     setMessages((currentMessages) => [...currentMessages, createMessage("user", prompt)]);
 
     try {
-      const response = await buildMockAiResponse(prompt);
+      const response = await sendMessage(prompt);
       setMessages((currentMessages) => [
         ...currentMessages,
-        createMessage("assistant", response)
+        createMessage(
+          "assistant",
+          response.answer || "Northline AI did not return an answer for that request."
+        )
       ]);
     } catch (caughtError) {
       setError(
@@ -205,7 +221,7 @@ export function FinanceAiAssistant() {
                 <div className="rounded-[20px] border border-[rgba(25,106,117,0.16)] bg-white px-4 py-4 text-sm leading-7 text-[var(--muted)]">
                   <span className="inline-flex items-center gap-2">
                     <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--ocean)]" />
-                    Preparing a read-only preview...
+                    Preparing a read-only answer...
                   </span>
                 </div>
               ) : null}
